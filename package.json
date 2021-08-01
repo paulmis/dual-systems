@@ -9,8 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.17.1",
     "jquery": "^3.6.0",
     "lua-json": "^1.0.0",
-    "paper": "^0.12.15"
+    "three": "^0.131.1"
   }
 }
