@@ -1,5 +1,6 @@
-.main-wrapper {
-    width: 92%;
+#main-wrapper {
+    width: 1200px;
+    height: 800px;
     margin: auto;
     margin-top: 3vmin;
     background-color: #fafafa;
@@ -7,6 +8,6 @@
 }
 
 canvas[resize] {
-    width: 100%;
-    height: 100%;
+    width: 90%;
+    height: 90%;
 }

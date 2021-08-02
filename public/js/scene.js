@@ -1,14 +1,78 @@
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+const wrapper = document.getElementById("main-wrapper");
+const width = $(wrapper).width(), height = $(wrapper).height();
 
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
+renderer.setSize(width, height);
+wrapper.appendChild(renderer.domElement);
+
+wrapper.addEventListener('mousemove', onPointerMove);
+wrapper.addEventListener('resize', onWindowResize);
+
+function onWindowResize() {
+    width = $(wrapper).width(), height = $(wrapper).height();
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+    render();
+}
+
+const pointer = new THREE.Vector2();
+const pointerId = null;
+function onPointerMove(event) {
+    pointer.x = (event.clientX - $(wrapper).offset().left) / width * 2 - 1;
+    pointer.y = - (event.clientY - $(wrapper).offset().top) / height * 2 + 1;
+    console.log(pointer);
+
+    if (pointerId != null) {
+        scene.getObjectById(pointerId);
+    }
+
+    render();
+}
+
+let raycaster = new THREE.Raycaster();
+let intersected = null;
+let bodyIds = [], transparentIds = [];
+
+function render() {
+    // Shoot the raycast
+    raycaster.setFromCamera(pointer, camera);
+    let intersects = raycaster.intersectObjects(scene.children);
+
+    // Skip transparent objects
+    var it = 0;
+    while (it < intersects.length && transparentIds.includes(intersects[it].object.id))
+        it++;
+
+    // If the raycast intersects some objects...
+    if (it < intersects.length) {
+        if (intersected != intersects[it].object) {
+            // Cleanup old intersect
+            if (intersected) {
+                intersected.material.color.set(0xeeeeee);
+            }
+
+            if (bodyIds.includes(intersects[it].object.id)) {
+                intersected = intersects[it].object;
+                intersected.material.color.set(0xff0000);
+            }
+        }
+    // Otherwise cleanup the old object
+    } else if (intersected) {
+        intersected.material.color.set(0xeeeeee);
+        intersected = null;
+    }
+
+    // Render the map
+    renderer.render(scene, camera);
+}
 
 $.getJSON("data/helios.json", function(stars) {
     $.each(stars, function(id, bodies) {
         $.each(bodies, function(id, params) {
-            if (!params.name.includes("Moon")) {
+            if (!params.name.includes("Moon") && !params.name.includes("Sanctuary")) {
                 var x = (params.center.x + 150000000) / 1000000;
                 var y = (params.center.y + 120000000) / 1000000;
                 var z = params.center.z / 1000000;
@@ -18,6 +82,23 @@ $.getJSON("data/helios.json", function(stars) {
                 const sphere = new THREE.Mesh(geometry, material);
                 scene.add(sphere);
 
+                bodyIds.push(sphere.id);
+                
+                const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(x, y, z),
+                    new THREE.Vector3(x, y, 0)
+                ]);
+                const line = new THREE.Line(lineGeometry, material);
+                scene.add(line);
+
+                if (Math.abs(z) > 1) {
+                    const ringGeometry = new THREE.RingGeometry(0, 3, 20);
+                    const ringMaterial = new THREE.MeshBasicMaterial({opacity: 0.4, transparent: true})
+                    const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                    scene.add(ring);
+                    ring.position.set(x, y, 0);
+                }
+
                 sphere.position.set(x, y, z);
                 console.log(params.name + ":", x, y, z);
                 renderer.render(scene, camera);
@@ -26,14 +107,17 @@ $.getJSON("data/helios.json", function(stars) {
     });
 });
 
-const geometry = new THREE.RingGeometry(5, 125, 100);
-const material = new THREE.MeshBasicMaterial({opacity: 0.2  , transparent: true})
+console.log(bodyIds);
+
+const geometry = new THREE.RingGeometry(0, 110, 100);
+const material = new THREE.MeshBasicMaterial({color: 0xddddff, opacity: 0.15, transparent: true})
 const ring = new THREE.Mesh(geometry, material);
 scene.add(ring);
-ring.position.set(150, 120);
+transparentIds.push(ring.id);
+ring.position.set(155, 115, 0);
 
-camera.position.set(150, 120, 175);
-renderer.render(scene, camera);
+camera.position.set(155, 115, 170);
+render();
 
 var cameraSpeed = 2.0;
 function moveCamera(pos, rotate) {
@@ -41,7 +125,7 @@ function moveCamera(pos, rotate) {
     camera.rotation.x += rotate.x * cameraSpeed;
     camera.rotation.y += rotate.y * cameraSpeed;
     camera.rotation.z += rotate.z * cameraSpeed;
-    renderer.render(scene, camera);
+    render();
 }
 // A D - simple X
 // W S - simple Y
