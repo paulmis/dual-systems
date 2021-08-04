@@ -1,6 +1,15 @@
 #main-wrapper {
+    display: flex;
+}
+
+#body-info {
+    line-height: 2px;
+    width: 200px;
+}
+
+#scene-wrapper {
     width: 1200px;
-    height: 800px;
+    height: 875px;
     margin: auto;
     margin-top: 3vmin;
     background-color: #fafafa;

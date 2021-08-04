@@ -1,4 +1,4 @@
-const wrapper = document.getElementById("main-wrapper");
+const wrapper = document.getElementById("scene-wrapper");
 const width = $(wrapper).width(), height = $(wrapper).height();
 
 const scene = new THREE.Scene();
@@ -23,7 +23,6 @@ const pointerId = null;
 function onPointerMove(event) {
     pointer.x = (event.clientX - $(wrapper).offset().left) / width * 2 - 1;
     pointer.y = - (event.clientY - $(wrapper).offset().top) / height * 2 + 1;
-    console.log(pointer);
 
     if (pointerId != null) {
         scene.getObjectById(pointerId);
@@ -34,7 +33,9 @@ function onPointerMove(event) {
 
 let raycaster = new THREE.Raycaster();
 let intersected = null;
-let bodyIds = [], transparentIds = [];
+let transparentIds = [], textIds = [];
+
+var bodies = new Map();
 
 function render() {
     // Shoot the raycast
@@ -54,44 +55,73 @@ function render() {
                 intersected.material.color.set(0xeeeeee);
             }
 
-            if (bodyIds.includes(intersects[it].object.id)) {
+            // Highlight new intersect
+            if (bodies.has(intersects[it].object.id)) {
                 intersected = intersects[it].object;
                 intersected.material.color.set(0xff0000);
+                setBodyInfo(bodies.get(intersected.id));
             }
         }
     // Otherwise cleanup the old object
     } else if (intersected) {
         intersected.material.color.set(0xeeeeee);
         intersected = null;
+        clearBodyInfo();
+    }
+
+    for (var textId of textIds) {
+        scene.getObjectById(textId).lookAt(camera.position);
     }
 
     // Render the map
     renderer.render(scene, camera);
 }
 
-$.getJSON("data/helios.json", function(stars) {
-    $.each(stars, function(id, bodies) {
-        $.each(bodies, function(id, params) {
-            if (!params.name.includes("Moon") && !params.name.includes("Sanctuary")) {
-                var x = (params.center.x + 150000000) / 1000000;
-                var y = (params.center.y + 120000000) / 1000000;
-                var z = params.center.z / 1000000;
+// Load fonts
+const loader = new THREE.FontLoader();
+var opensans;
+loader.load(
+    "fonts/open-sans.json",
+    function(font) {
+        opensans = font;
+    }
+);
 
-                const geometry = new THREE.SphereGeometry(1);
-                const material = new THREE.MeshBasicMaterial({color: 0xeeeeee});
-                const sphere = new THREE.Mesh(geometry, material);
-                scene.add(sphere);
+while (opensans == null) {
+    await new Promise(r => setTimeout(r, 2));
+}
 
-                bodyIds.push(sphere.id);
-                
-                const lineGeometry = new THREE.BufferGeometry().setFromPoints([
-                    new THREE.Vector3(x, y, z),
-                    new THREE.Vector3(x, y, 0)
-                ]);
-                const line = new THREE.Line(lineGeometry, material);
-                scene.add(line);
+// Render bodies
+$.getJSON("data/helios.json", function(starsdata) {
+    $.each(starsdata, function(id, bodiesdata) {
+        $.each(bodiesdata, function(id, params) {
+            var size, col, moon;
+            if (params.name.includes("Moon") || params.name.includes("Sanctuary")) {
+                size = 0.4, col = 0xbbbbbb, moon = true;
+            } else {
+                size = 1.0, col = 0xeeeeee, moon = false;
+            }
 
+            var x = (params.center.x + 150000000) / 1000000;
+            var y = (params.center.y + 120000000) / 1000000;
+            var z = params.center.z / 1000000;
+
+            const geometry = new THREE.SphereGeometry(size);
+            const material = new THREE.MeshBasicMaterial({color: col});
+            const sphere = new THREE.Mesh(geometry, material);
+            scene.add(sphere);
+
+            bodies.set(sphere.id, params);
+
+            if (!moon) {
                 if (Math.abs(z) > 1) {
+                    const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+                        new THREE.Vector3(x, y, z),
+                        new THREE.Vector3(x, y, 0)
+                    ]);
+                    const line = new THREE.Line(lineGeometry, material);
+                    scene.add(line);
+    
                     const ringGeometry = new THREE.RingGeometry(0, 3, 20);
                     const ringMaterial = new THREE.MeshBasicMaterial({opacity: 0.4, transparent: true})
                     const ring = new THREE.Mesh(ringGeometry, ringMaterial);
@@ -99,15 +129,37 @@ $.getJSON("data/helios.json", function(stars) {
                     ring.position.set(x, y, 0);
                 }
 
-                sphere.position.set(x, y, z);
-                console.log(params.name + ":", x, y, z);
-                renderer.render(scene, camera);
+                const textGeometry = new THREE.TextGeometry(params.name, {
+                    font: opensans,
+                    size: 2.0,
+                    height: 0.5,
+                    curveSegments: 50
+                });
+                const textMaterial = new THREE.MeshBasicMaterial({color: 0x66dd66});
+                const text = new THREE.Mesh(textGeometry, textMaterial);
+                scene.add(text);
+                text.position.set(x, y, z);
+                textIds.push(text.id);
             }
+
+            sphere.position.set(x, y, z);
+            console.log(params.name + ":", x, y, z);
+            renderer.render(scene, camera);
         });
     });
 });
 
-console.log(bodyIds);
+function setBodyInfo(parameters) {
+    document.getElementById("body-info-name").innerHTML = parameters.name;
+    document.getElementById("body-info-gravity").innerHTML = "unknown";
+    document.getElementById("body-info-size").innerHTML = parameters.radius;
+}
+
+function clearBodyInfo() {
+    document.getElementById("body-info-name").innerHTML = "";
+    document.getElementById("body-info-gravity").innerHTML = "";
+    document.getElementById("body-info-size").innerHTML = "";
+}
 
 const geometry = new THREE.RingGeometry(0, 110, 100);
 const material = new THREE.MeshBasicMaterial({color: 0xddddff, opacity: 0.15, transparent: true})
@@ -119,7 +171,7 @@ ring.position.set(155, 115, 0);
 camera.position.set(155, 115, 170);
 render();
 
-var cameraSpeed = 2.0;
+var cameraSpeed = 4.0;
 function moveCamera(pos, rotate) {
     camera.position.add(pos.multiplyScalar(cameraSpeed));   
     camera.rotation.x += rotate.x * cameraSpeed;
