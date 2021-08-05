@@ -145,6 +145,10 @@ $.getJSON("data/helios.json", function(starsdata) {
             sphere.position.set(x, y, z);
             console.log(params.name + ":", x, y, z);
             renderer.render(scene, camera);
+
+            var listElement = document.createElement("li");
+            listElement.innerHTML = params.name;
+            document.getElementById("poi-list").appendChild(listElement);
         });
     });
 });

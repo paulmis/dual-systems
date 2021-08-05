@@ -20,3 +20,35 @@ canvas[resize] {
     width: 90%;
     height: 90%;
 }
+
+#left-menu {
+    margin: 20px;
+    padding: 20px;
+    box-shadow: 2px 2px 8px 1px rgba(0, 0, 0, 0.2);
+}
+
+.poi-list-btn {
+    border: none;
+    padding: 6px 10px;
+    background-color: black;
+    color: white;
+    opacity: 0.8;
+    transition: 0.15s;
+}
+
+.poi-list-btn:hover {
+    opacity: 1.0;
+    transform: scale(1.02);
+}
+
+.poi-list-btn.toggled {
+    background-color: darkblue; 
+}
+
+#poi-list {
+    padding: 10px;
+    border: 1px;
+    width: 300px;
+    border-style: solid;
+    overflow: auto;
+}

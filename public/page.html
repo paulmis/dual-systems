@@ -6,17 +6,42 @@
 
     <link rel="stylesheet" href="css/styles.css">
     <script src="js/jquery.js"></script>
+    <script>
+        function filterPOI(type) {
+            var id = 'poi-' + type + '-btn';
+            var element = document.getElementById(id);
+            console.log(id);
+
+            if (element.classList.contains('toggled')) {
+                element.classList.remove('toggled');
+            }
+            else {
+                element.classList.add('toggled');
+            }
+        }
+    </script>
 </head>
 <body>
     <script type="text/javascript" src="js/three.min.js"></script>
     <script type="module" src="js/scene.js"></script>
 
     <div id="main-wrapper">
-        <div id="body-info">
-            <p id="body-info-name"></p>
-            <p id="body-info-gravity"></p>
-            <p id="body-info-size"></p>
+        <div id="left-menu">
+            <div id="poi-wrapper">
+                <input type="button" id="poi-planets-btn" class="poi-list-btn" value="Planets" onclick="filterPOI('planets')"/>
+                <input type="button" id="poi-moons-btn" class="poi-list-btn" value="Moons" onclick="filterPOI('moons')"/>
+                <input type="button" id="poi-starbases-btn" class="poi-list-btn" value="Starbases" onclick="filterPOI('starbases')"/>
+                <input type="button" id="poi-fleets-btn" class="poi-list-btn" value="Fleets" onclick="filterPOI('fleets')"/>
+                <ul id="poi-list">
+                </ul>
+            </div>
+            <div id="body-info">
+                <p id="body-info-name"></p>
+                <p id="body-info-gravity"></p>
+                <p id="body-info-size"></p>
+            </div>
         </div>
+        
         <div id="scene-wrapper">
 
         </div>
