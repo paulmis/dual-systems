@@ -32,10 +32,11 @@ function onPointerMove(event) {
 }
 
 let raycaster = new THREE.Raycaster();
-let intersected = null;
+let intersected = null, intersectedColor = null;
 let transparentIds = [], textIds = [];
 
-var bodies = new Map();
+var bodies = new Map();  // Maps bodies to their parameters
+var objects = new Map(); // Maps three.js objects to bodies
 
 function render() {
     // Shoot the raycast
@@ -44,7 +45,8 @@ function render() {
 
     // Skip transparent objects
     var it = 0;
-    while (it < intersects.length && transparentIds.includes(intersects[it].object.id))
+    while (it < intersects.length &&
+        transparentIds.includes(intersects[it].object.id))
         it++;
 
     // If the raycast intersects some objects...
@@ -52,20 +54,23 @@ function render() {
         if (intersected != intersects[it].object) {
             // Cleanup old intersect
             if (intersected) {
-                intersected.material.color.set(0xeeeeee);
+                intersected.material.color.set(intersectedColor);
             }
 
             // Highlight new intersect
-            if (bodies.has(intersects[it].object.id)) {
+            if (objects.has(intersects[it].object.id)) {
                 intersected = intersects[it].object;
+                // Avoid reference copy
+                intersectedColor = $.extend(true, {}, intersected.material.color);
                 intersected.material.color.set(0xff0000);
-                setBodyInfo(bodies.get(intersected.id));
+                setBodyInfo(bodies.get(objects.get(intersected.id)));
             }
         }
     // Otherwise cleanup the old object
     } else if (intersected) {
-        intersected.material.color.set(0xeeeeee);
+        intersected.material.color.set(intersectedColor);
         intersected = null;
+        intersectedColor = null;
         clearBodyInfo();
     }
 
@@ -91,88 +96,144 @@ while (opensans == null) {
     await new Promise(r => setTimeout(r, 2));
 }
 
-// Render bodies
-$.getJSON("data/helios.json", function(starsdata) {
-    $.each(starsdata, function(id, bodiesdata) {
-        $.each(bodiesdata, function(id, params) {
-            var size, col, moon;
-            if (params.name.includes("Moon") || params.name.includes("Sanctuary")) {
-                size = 0.4, col = 0xbbbbbb, moon = true;
-            } else {
-                size = 1.0, col = 0xeeeeee, moon = false;
-            }
+// Read bodies from the file
+$.getJSON("data/helios.json", function(json) {
+    $.each(json, function(id, body) {
+        readBody(body, document.getElementById("poi-list"));
+    });
+    renderer.render(scene, camera);
+});
 
-            var x = (params.center.x + 150000000) / 1000000;
-            var y = (params.center.y + 120000000) / 1000000;
-            var z = params.center.z / 1000000;
+// Recursively reads, renders and remembers bodies from a json dump
+function readBody(body, poi) {
+    // Render
+    var objectId = renderBody(body);
 
-            const geometry = new THREE.SphereGeometry(size);
-            const material = new THREE.MeshBasicMaterial({color: col});
-            const sphere = new THREE.Mesh(geometry, material);
-            scene.add(sphere);
+    // Save body data
+    bodies.set(body.bodyId, body);
+    objects.set(objectId, body.bodyId);
 
-            bodies.set(sphere.id, params);
+    // Add to the POI list
+    var listElement = document.createElement("li");
+    listElement.innerHTML = body.name;
+    poi.appendChild(listElement);
 
-            if (!moon) {
-                if (Math.abs(z) > 1) {
-                    const lineGeometry = new THREE.BufferGeometry().setFromPoints([
-                        new THREE.Vector3(x, y, z),
-                        new THREE.Vector3(x, y, 0)
-                    ]);
-                    const line = new THREE.Line(lineGeometry, material);
-                    scene.add(line);
-    
-                    const ringGeometry = new THREE.RingGeometry(0, 3, 20);
-                    const ringMaterial = new THREE.MeshBasicMaterial({opacity: 0.4, transparent: true})
-                    const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-                    scene.add(ring);
-                    ring.position.set(x, y, 0);
-                }
+    if (body.bodies) {
+        var childrenElement = document.createElement("ul");
+        poi.append(childrenElement);
 
-                const textGeometry = new THREE.TextGeometry(params.name, {
+        // Call children
+        $.each(body.bodies, function(id, childBody) {
+            readBody(childBody, childrenElement);
+        });
+    }
+}
+
+// Renders a body on the system map
+function renderBody(body) {
+    // Squeeze coordinates
+    var center = new THREE.Vector3(
+        body.center.x,
+        body.center.y,
+        body.center.z
+    );
+    center.divideScalar(1000000);
+
+    // Generate the sphere
+    const sphere = getBodyMesh(body.type);
+    sphere.position.set(center.x, center.y, center.z);
+    scene.add(sphere);
+
+    // If the sphere is a planet, render its name
+    if (body.type == "planet") {
+        // Generate the text
+        const text = new THREE.Mesh(
+            new THREE.TextGeometry(
+                body.name, 
+                {
                     font: opensans,
                     size: 2.0,
                     height: 0.5,
                     curveSegments: 50
-                });
-                const textMaterial = new THREE.MeshBasicMaterial({color: 0x66dd66});
-                const text = new THREE.Mesh(textGeometry, textMaterial);
-                scene.add(text);
-                text.position.set(x, y, z);
-                textIds.push(text.id);
-            }
+                }
+            ), 
+            new THREE.MeshBasicMaterial({
+                color: 0x66dd66
+            })
+        );
+        text.position.set(center);
+        scene.add(text);
+        textIds.push(text.id);
 
-            sphere.position.set(x, y, z);
-            console.log(params.name + ":", x, y, z);
-            renderer.render(scene, camera);
+        // If the planet isn't close to the z=0 plane, generate the stand
+        if (Math.abs(center.z) > 1) {
+            const line = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints([
+                    center,
+                    new THREE.Vector3(center.x, center.y, 0)]),
+                new THREE.MeshBasicMaterial({
+                    color: 0xeeeeee,
+                })
+            );
+            const ring = new THREE.Mesh(
+                new THREE.RingGeometry(0, 3, 20),
+                new THREE.MeshBasicMaterial({
+                    opacity: 0.4, 
+                    transparent: true
+                })
+            );
+            ring.position.set(center.x, center.y, 0);
+            scene.add(line, ring);
+        }        
+    }
 
-            var listElement = document.createElement("li");
-            listElement.innerHTML = params.name;
-            document.getElementById("poi-list").appendChild(listElement);
-        });
-    });
-});
+    // Return the id
+    return sphere.id;
+}
+
+function getBodyMesh(type) {
+    switch (type) {
+        case "star": 
+            return new THREE.Mesh(
+                new THREE.SphereGeometry(3.0),
+                new THREE.MeshBasicMaterial({
+                    color: 0xf4cd00,
+                }));
+        case "planet": 
+            return new THREE.Mesh(
+                new THREE.SphereGeometry(1.0),
+                new THREE.MeshBasicMaterial({
+                    color: 0xeeeeee,
+                }));
+        case "moon":
+            return new THREE.Mesh(
+                new THREE.SphereGeometry(0.4),
+                new THREE.MeshBasicMaterial({
+                    color: 0xbbbbbb,
+                }));
+    }
+}
 
 function setBodyInfo(parameters) {
-    document.getElementById("body-info-name").innerHTML = parameters.name;
-    document.getElementById("body-info-gravity").innerHTML = "unknown";
-    document.getElementById("body-info-size").innerHTML = parameters.radius;
+    document.getElementById("poi-current-name").innerHTML = parameters.name;
+    document.getElementById("poi-current-gravity").innerHTML = "unknown";
+    document.getElementById("poi-current-size").innerHTML = parameters.radius;
 }
 
 function clearBodyInfo() {
-    document.getElementById("body-info-name").innerHTML = "";
-    document.getElementById("body-info-gravity").innerHTML = "";
-    document.getElementById("body-info-size").innerHTML = "";
+    document.getElementById("poi-current-name").innerHTML = "";
+    document.getElementById("poi-current-gravity").innerHTML = "";
+    document.getElementById("poi-current-size").innerHTML = "";
 }
 
-const geometry = new THREE.RingGeometry(0, 110, 100);
+const geometry = new THREE.RingGeometry(0, 140, 100);
 const material = new THREE.MeshBasicMaterial({color: 0xddddff, opacity: 0.15, transparent: true})
 const ring = new THREE.Mesh(geometry, material);
 scene.add(ring);
 transparentIds.push(ring.id);
-ring.position.set(155, 115, 0);
+ring.position.set(-2, 30, 0);
 
-camera.position.set(155, 115, 170);
+camera.position.set(0, 0, 170);
 render();
 
 var cameraSpeed = 4.0;

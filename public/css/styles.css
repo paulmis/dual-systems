@@ -1,30 +1,30 @@
+body {
+    background-color: black;
+    color: white;
+}
+
 #main-wrapper {
     display: flex;
 }
 
-#body-info {
+#poi-current {
     line-height: 2px;
     width: 200px;
-}
-
-#scene-wrapper {
-    width: 1200px;
-    height: 875px;
-    margin: auto;
-    margin-top: 3vmin;
-    background-color: #fafafa;
-    box-shadow: 2px 2px 8px 1px rgba(0, 0, 0, 0.2);
-}
-
-canvas[resize] {
-    width: 90%;
-    height: 90%;
 }
 
 #left-menu {
     margin: 20px;
     padding: 20px;
+    background-color: rgb(40, 40, 40);
     box-shadow: 2px 2px 8px 1px rgba(0, 0, 0, 0.2);
+}
+
+#poi-current {
+    padding: 10px;
+    margin: 10px 10px 20px 10px;
+    border: 1px;
+    border-style: solid;
+    height: 60px;
 }
 
 .poi-list-btn {
@@ -33,7 +33,7 @@ canvas[resize] {
     background-color: black;
     color: white;
     opacity: 0.8;
-    transition: 0.15s;
+    transition: 0.15s;      
 }
 
 .poi-list-btn:hover {
@@ -48,7 +48,26 @@ canvas[resize] {
 #poi-list {
     padding: 10px;
     border: 1px;
-    width: 300px;
+    height: 300px;
     border-style: solid;
     overflow: auto;
+}
+
+#poi-list ul {
+    padding-left: 25px;
+}
+
+#scene-wrapper {
+    width: 1200px;
+    height: 875px;
+    margin: auto;
+    margin-top: 3vmin;
+    background-color: rgb(100, 100, 100);
+    padding: 1px;
+    box-shadow: 2px 2px 12px 2px rgba(255, 255, 255, 0.4);
+}
+
+canvas[resize] {
+    width: 90%;
+    height: 90%;
 }

@@ -27,6 +27,11 @@
 
     <div id="main-wrapper">
         <div id="left-menu">
+            <div id="poi-current">
+                <p id="poi-current-name"></p>
+                <p id="poi-current-gravity"></p>
+                <p id="poi-current-size"></p>
+            </div>
             <div id="poi-wrapper">
                 <input type="button" id="poi-planets-btn" class="poi-list-btn" value="Planets" onclick="filterPOI('planets')"/>
                 <input type="button" id="poi-moons-btn" class="poi-list-btn" value="Moons" onclick="filterPOI('moons')"/>
@@ -34,11 +39,6 @@
                 <input type="button" id="poi-fleets-btn" class="poi-list-btn" value="Fleets" onclick="filterPOI('fleets')"/>
                 <ul id="poi-list">
                 </ul>
-            </div>
-            <div id="body-info">
-                <p id="body-info-name"></p>
-                <p id="body-info-gravity"></p>
-                <p id="body-info-size"></p>
             </div>
         </div>
         
