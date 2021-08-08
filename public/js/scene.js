@@ -219,16 +219,18 @@ function getBodyMesh(type) {
     }
 }
 
-function setBodyInfo(parameters) {
-    document.getElementById("poi-current-image").src = "data/images/planet-icons/" + parameters.name + ".png";
+function setBodyInfo(body) {
+    document.getElementById("poi-current-image").src = "data/images/planet-icons/" + body.name + ".png";
     document.getElementById("poi-current-image").style.opacity = 1.0;
-    document.getElementById("poi-current-name").innerHTML = parameters.name;
-    document.getElementById("poi-current-gravity").innerHTML = "unknown";
-    document.getElementById("poi-current-size").innerHTML = parameters.radius;
+    document.getElementById("poi-current-name").innerHTML = body.name;
+    if (body.type == "star" || body.type == "planet") {
+        document.getElementById("poi-current-name").innerHTML += " (" + Object.keys(body.bodies).length + ")";
+    }
+    document.getElementById("poi-current-gravity").innerHTML = parseFloat(body.gravity).toPrecision(2) + "g";
+    document.getElementById("poi-current-size").innerHTML = body.radius;
 }
 
 function clearBodyInfo() {
-    document.getElementById("poi-current-image").src = "data/images/planet-icons/none.png";
     document.getElementById("poi-current-image").style.opacity = 0.0;
     document.getElementById("poi-current-name").innerHTML = "";
     document.getElementById("poi-current-gravity").innerHTML = "";
