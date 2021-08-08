@@ -29,7 +29,6 @@ body {
 }
 
 #poi-current-image {
-    width: 60px;
     height: 60px;
     z-index: 2;
     border-style: none;

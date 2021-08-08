@@ -1,25 +1,86 @@
+import * as THREE from 'https://cdn.skypack.dev/three@0.131.3'
+import { TrackballControls } from 'https://cdn.skypack.dev/three@0.131.3/examples/jsm/controls/TrackballControls.js'
+
 const wrapper = document.getElementById("scene-wrapper");
 const width = $(wrapper).width(), height = $(wrapper).height();
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(width, height);
 wrapper.appendChild(renderer.domElement);
 
-wrapper.addEventListener('mousemove', onPointerMove);
+let raycaster = new THREE.Raycaster();
+let intersected = null, intersectedColor = null;
+let transparentIds = [], textIds = [];
+const pointer = new THREE.Vector2();
+const pointerId = null;
+
+var bodies = new Map();  // Maps bodies to their parameters
+var objects = new Map(); // Maps three.js objects to bodies
+
+// Camera
+const aspect = width / height;
+const camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
+const controls = new TrackballControls(camera, wrapper);
+controls.rotateSpeed = 1.0;
+controls.zoomSpeed = 1.2;
+controls.panSpeed = 0.8;
+controls.keys = [ 'KeyA', 'KeyS', 'KeyD' ];
+
+// Load fonts
+const loader = new THREE.FontLoader();
+var opensans;
+loader.load(
+    "fonts/json/opensans.json",
+    function(font) {
+        opensans = font;
+    }
+);
+
+while (opensans == null) {
+    await new Promise(r => setTimeout(r, 2));
+}
+
+init();
+animate();
+
+function init() {
+    // Read bodies from the file
+    $.getJSON("data/helios.json", function(json) {
+        $.each(json, function(id, body) {
+            readBody(body, document.getElementById("poi-list"));
+        });
+    });
+
+    // Add the ring
+    const geometry = new THREE.RingGeometry(0, 140, 100);
+    const material = new THREE.MeshBasicMaterial({color: 0xddddff, opacity: 0.15, transparent: true})
+    const ring = new THREE.Mesh(geometry, material);
+    scene.add(ring);
+    transparentIds.push(ring.id);
+    ring.position.set(-2, 30, 0);
+
+    camera.position.set(0, 0, 170);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    render();
+}
+
 wrapper.addEventListener('resize', onWindowResize);
+wrapper.addEventListener('mousemove', onPointerMove);
 
 function onWindowResize() {
     width = $(wrapper).width(), height = $(wrapper).height();
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
+    controls.handleResize();
     renderer.setSize(width, height);
     render();
 }
 
-const pointer = new THREE.Vector2();
-const pointerId = null;
 function onPointerMove(event) {
     pointer.x = (event.clientX - $(wrapper).offset().left) / width * 2 - 1;
     pointer.y = - (event.clientY - $(wrapper).offset().top) / height * 2 + 1;
@@ -30,13 +91,6 @@ function onPointerMove(event) {
 
     render();
 }
-
-let raycaster = new THREE.Raycaster();
-let intersected = null, intersectedColor = null;
-let transparentIds = [], textIds = [];
-
-var bodies = new Map();  // Maps bodies to their parameters
-var objects = new Map(); // Maps three.js objects to bodies
 
 function render() {
     // Shoot the raycast
@@ -81,28 +135,6 @@ function render() {
     // Render the map
     renderer.render(scene, camera);
 }
-
-// Load fonts
-const loader = new THREE.FontLoader();
-var opensans;
-loader.load(
-    "fonts/json/opensans.json",
-    function(font) {
-        opensans = font;
-    }
-);
-
-while (opensans == null) {
-    await new Promise(r => setTimeout(r, 2));
-}
-
-// Read bodies from the file
-$.getJSON("data/helios.json", function(json) {
-    $.each(json, function(id, body) {
-        readBody(body, document.getElementById("poi-list"));
-    });
-    renderer.render(scene, camera);
-});
 
 // Recursively reads, renders and remembers bodies from a json dump
 function readBody(body, poi) {
@@ -236,71 +268,3 @@ function clearBodyInfo() {
     document.getElementById("poi-current-gravity").innerHTML = "";
     document.getElementById("poi-current-size").innerHTML = "";
 }
-
-const geometry = new THREE.RingGeometry(0, 140, 100);
-const material = new THREE.MeshBasicMaterial({color: 0xddddff, opacity: 0.15, transparent: true})
-const ring = new THREE.Mesh(geometry, material);
-scene.add(ring);
-transparentIds.push(ring.id);
-ring.position.set(-2, 30, 0);
-
-camera.position.set(0, 0, 170);
-render();
-
-var cameraSpeed = 4.0;
-function moveCamera(pos, rotate) {
-    camera.position.add(pos.multiplyScalar(cameraSpeed));   
-    camera.rotation.x += rotate.x * cameraSpeed;
-    camera.rotation.y += rotate.y * cameraSpeed;
-    camera.rotation.z += rotate.z * cameraSpeed;
-    render();
-}
-// A D - simple X
-// W S - simple Y
-// C sp - simple Z
-
-// R F - vertical strife
-// Q E - horizontal strife
-// Z X - zoom
-
-document.addEventListener('keypress', function(event) {
-    switch (event.code) {
-        case 'KeyD':
-            moveCamera(new THREE.Vector3(1, 0, 0), new THREE.Euler());
-            break;
-        case 'KeyA':
-            moveCamera(new THREE.Vector3(-1, 0, 0), new THREE.Euler());
-            break;
-        case 'KeyW':
-            moveCamera(new THREE.Vector3(0, 1, 0), new THREE.Euler());
-            break;
-        case 'KeyS':
-            moveCamera(new THREE.Vector3(0, -1, 0), new THREE.Euler());
-            break;
-        case 'Space':
-            moveCamera(new THREE.Vector3(0, 0, 1), new THREE.Euler());
-            break;
-        case 'KeyC':
-            moveCamera(new THREE.Vector3(0, 0, -1), new THREE.Euler());
-            break;
-        case 'KeyR':
-            moveCamera(new THREE.Vector3(), new THREE.Euler(0.04, 0, 0));
-            break;
-        case 'KeyF':
-            moveCamera(new THREE.Vector3(), new THREE.Euler(-0.04, 0, 0));
-            break;
-        case 'KeyQ':
-            moveCamera(new THREE.Vector3(), new THREE.Euler(0, 0.04, 0));
-            break;
-        case 'KeyE':
-            moveCamera(new THREE.Vector3(), new THREE.Euler(0, -0.04, 0));
-            break;
-        case 'KeyZ':
-            moveCamera(new THREE.Vector3(), new THREE.Euler(0, 0, 0.04));
-            break;
-        case 'KeyX':
-            moveCamera(new THREE.Vector3(), new THREE.Euler(0, 0, -0.04));
-            break;
-    }
-    console.log(event.key, event.code);
-})
