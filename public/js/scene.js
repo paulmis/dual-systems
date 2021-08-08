@@ -86,7 +86,7 @@ function render() {
 const loader = new THREE.FontLoader();
 var opensans;
 loader.load(
-    "fonts/open-sans.json",
+    "fonts/json/opensans.json",
     function(font) {
         opensans = font;
     }
@@ -147,21 +147,26 @@ function renderBody(body) {
     // If the sphere is a planet, render its name
     if (body.type == "planet") {
         // Generate the text
+        const geometry = new THREE.TextGeometry(
+            body.name, 
+            {
+                font: opensans,
+                size: 2.0,
+                height: 0.5,
+                curveSegments: 50
+            }
+        );
         const text = new THREE.Mesh(
-            new THREE.TextGeometry(
-                body.name, 
-                {
-                    font: opensans,
-                    size: 2.0,
-                    height: 0.5,
-                    curveSegments: 50
-                }
-            ), 
+            geometry,
             new THREE.MeshBasicMaterial({
                 color: 0x66dd66
             })
         );
-        text.position.set(center);
+        geometry.computeBoundingBox();
+        var vec = new THREE.Vector3();
+        geometry.boundingBox.getSize(vec);
+
+        text.position.set(center.x - vec.x / 2, center.y - 5, center.z);
         scene.add(text);
         textIds.push(text.id);
 
@@ -215,12 +220,16 @@ function getBodyMesh(type) {
 }
 
 function setBodyInfo(parameters) {
+    document.getElementById("poi-current-image").src = "data/images/planet-icons/" + parameters.name + ".png";
+    document.getElementById("poi-current-image").style.opacity = 1.0;
     document.getElementById("poi-current-name").innerHTML = parameters.name;
     document.getElementById("poi-current-gravity").innerHTML = "unknown";
     document.getElementById("poi-current-size").innerHTML = parameters.radius;
 }
 
 function clearBodyInfo() {
+    document.getElementById("poi-current-image").src = "data/images/planet-icons/none.png";
+    document.getElementById("poi-current-image").style.opacity = 0.0;
     document.getElementById("poi-current-name").innerHTML = "";
     document.getElementById("poi-current-gravity").innerHTML = "";
     document.getElementById("poi-current-size").innerHTML = "";

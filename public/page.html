@@ -28,15 +28,20 @@
     <div id="main-wrapper">
         <div id="left-menu">
             <div id="poi-current">
-                <p id="poi-current-name"></p>
-                <p id="poi-current-gravity"></p>
-                <p id="poi-current-size"></p>
+                <img id="poi-current-image">
+                <div id="poi-current-data">
+                    <p id="poi-current-name"></p>
+                    <p id="poi-current-gravity"></p>
+                    <p id="poi-current-size"></p>
+                </div>
             </div>
             <div id="poi-wrapper">
-                <input type="button" id="poi-planets-btn" class="poi-list-btn" value="Planets" onclick="filterPOI('planets')"/>
-                <input type="button" id="poi-moons-btn" class="poi-list-btn" value="Moons" onclick="filterPOI('moons')"/>
-                <input type="button" id="poi-starbases-btn" class="poi-list-btn" value="Starbases" onclick="filterPOI('starbases')"/>
-                <input type="button" id="poi-fleets-btn" class="poi-list-btn" value="Fleets" onclick="filterPOI('fleets')"/>
+                <div id="poi-filters">
+                    <input type="button" id="poi-planets-btn" class="poi-list-btn toggled" value="Planets" onclick="filterPOI('planets')"/>
+                    <input type="button" id="poi-moons-btn" class="poi-list-btn" value="Moons" onclick="filterPOI('moons')"/>
+                    <input type="button" id="poi-starbases-btn" class="poi-list-btn" value="Starbases" onclick="filterPOI('starbases')"/>
+                    <input type="button" id="poi-fleets-btn" class="poi-list-btn" value="Fleets" onclick="filterPOI('fleets')"/>
+                </div>
                 <ul id="poi-list">
                 </ul>
             </div>
