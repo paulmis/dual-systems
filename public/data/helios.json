@@ -4,7 +4,6 @@
 		"type": "star",
 		"bodyId": 0,
 		"parentId": 0,
-		"planetarySystemId": 0,
 		"center": {
 			"x": -2000000,
 			"y": 30000000,
@@ -19,7 +18,6 @@
 				"type": "planet",
 				"bodyId": 1,
 				"parentId": 0,
-				"planetarySystemId": 0,
 				"center": {
 					"x": 17465536,
 					"y": 22665536,
@@ -34,7 +32,6 @@
 						"type": "moon",
 						"bodyId": 10,
 						"parentId": 1,
-						"planetarySystemId": 0,
 						"center": {
 							"x": 17448118.224,
 							"y": 22966846.286,
@@ -50,7 +47,6 @@
 						"type": "moon",
 						"bodyId": 11,
 						"parentId": 1,
-						"planetarySystemId": 0,
 						"center": {
 							"x": 17194626,
 							"y": 22243633.88,
@@ -66,7 +62,6 @@
 						"type": "moon",
 						"bodyId": 12,
 						"parentId": 1,
-						"planetarySystemId": 0,
 						"center": {
 							"x": 17520614,
 							"y": 22184730,
@@ -84,7 +79,6 @@
 				"type": "planet",
 				"bodyId": 2,
 				"parentId": 0,
-				"planetarySystemId": 0,
 				"center": {
 					"x": -8,
 					"y": -8,
@@ -99,7 +93,6 @@
 						"type": "moon",
 						"bodyId": 21,
 						"parentId": 2,
-						"planetarySystemId": 0,
 						"center": {
 							"x": 457933,
 							"y": -1509011,
@@ -115,7 +108,6 @@
 						"type": "moon",
 						"bodyId": 22,
 						"parentId": 2,
-						"planetarySystemId": 0,
 						"center": {
 							"x": -1692694,
 							"y": 729681,
@@ -131,7 +123,6 @@
 						"type": "moon",
 						"bodyId": 26,
 						"parentId": 2,
-						"planetarySystemId": 0,
 						"center": {
 							"x": -1404835,
 							"y": 562655,
@@ -149,7 +140,6 @@
 				"type": "planet",
 				"bodyId": 3,
 				"parentId": 0,
-				"planetarySystemId": 0,
 				"center": {
 					"x": 29165536,
 					"y": 10865536,
@@ -164,7 +154,6 @@
 						"type": "moon",
 						"bodyId": 30,
 						"parentId": 3,
-						"planetarySystemId": 0,
 						"center": {
 							"x": 29214402,
 							"y": 10907080.695,
@@ -180,7 +169,6 @@
 						"type": "moon",
 						"bodyId": 31,
 						"parentId": 3,
-						"planetarySystemId": 0,
 						"center": {
 							"x": 29404193,
 							"y": 10432768,
@@ -198,7 +186,6 @@
 				"type": "planet",
 				"bodyId": 4,
 				"parentId": 0,
-				"planetarySystemId": 0,
 				"center": {
 					"x": -13234464,
 					"y": 55765536,
@@ -213,7 +200,6 @@
 						"type": "moon",
 						"bodyId": 40,
 						"parentId": 4,
-						"planetarySystemId": 0,
 						"center": {
 							"x": -13503090,
 							"y": 55594325,
@@ -229,7 +215,6 @@
 						"type": "moon",
 						"bodyId": 41,
 						"parentId": 4,
-						"planetarySystemId": 0,
 						"center": {
 							"x": -12800515,
 							"y": 55700259,
@@ -245,7 +230,6 @@
 						"type": "moon",
 						"bodyId": 42,
 						"parentId": 4,
-						"planetarySystemId": 0,
 						"center": {
 							"x": -13058408,
 							"y": 55781856,
@@ -263,7 +247,6 @@
 				"type": "planet",
 				"bodyId": 5,
 				"parentId": 0,
-				"planetarySystemId": 0,
 				"center": {
 					"x": -43534464,
 					"y": 22565536,
@@ -278,7 +261,7 @@
 						"type": "moon",
 						"bodyId": 50,
 						"parentId": 5,
-						"planetarySystemId": 0,
+						
 						"center": {
 							"x": -43902841.78,
 							"y": 22261034.7,
@@ -296,7 +279,6 @@
 				"type": "planet",
 				"bodyId": 6,
 				"parentId": 0,
-				"planetarySystemId": 0,
 				"center": {
 					"x": 52765536,
 					"y": 27165538,
@@ -312,7 +294,6 @@
 				"type": "planet",
 				"bodyId": 7,
 				"parentId": 0,
-				"planetarySystemId": 0,
 				"center": {
 					"x": 58665538,
 					"y": 29665535,
@@ -327,7 +308,6 @@
 						"type": "moon",
 						"bodyId": 70,
 						"parentId": 7,
-						"planetarySystemId": 0,
 						"center": {
 							"x": 58969616,
 							"y": 29797945,
@@ -345,7 +325,7 @@
 				"type": "planet",
 				"bodyId": 8,
 				"parentId": 0,
-				"planetarySystemId": 0,
+				
 				"center": {
 					"x": 80865538,
 					"y": 54665536,
@@ -361,7 +341,7 @@
 				"type": "planet",
 				"bodyId": 9,
 				"parentId": 0,
-				"planetarySystemId": 0,
+				
 				"center": {
 					"x": -94134462,
 					"y": 12765534,
@@ -377,7 +357,6 @@
 				"type": "planet",
 				"bodyId": 100,
 				"parentId": 0,
-				"planetarySystemId": 0,
 				"center": {
 					"x": 98865536,
 					"y": -13534464,
@@ -392,7 +371,6 @@
 						"type": "moon",
 						"bodyId": 101,
 						"parentId": 100,
-						"planetarySystemId": 0,
 						"center": {
 							"x": 98905288.17,
 							"y": -13950921.1,
@@ -408,7 +386,6 @@
 						"type": "moon",
 						"bodyId": 102,
 						"parentId": 100,
-						"planetarySystemId": 0,
 						"center": {
 							"x": 99180968,
 							"y": -13783862,
@@ -424,7 +401,6 @@
 						"type": "moon",
 						"bodyId": 103,
 						"parentId": 100,
-						"planetarySystemId": 0,
 						"center": {
 							"x": 99250052,
 							"y": -13629215,
@@ -442,7 +418,7 @@
 				"type": "planet",
 				"bodyId": 110,
 				"parentId": 0,
-				"planetarySystemId": 0,
+				
 				"center": {
 					"x": 14165536,
 					"y": -85634465,
@@ -458,7 +434,6 @@
 				"type": "planet",
 				"bodyId": 120,
 				"parentId": 0,
-				"planetarySystemId": 0,
 				"center": {
 					"x": 2865536.7,
 					"y": -99034464,
@@ -473,7 +448,6 @@
 						"type": "moon",
 						"bodyId": 121,
 						"parentId": 120,
-						"planetarySystemId": 0,
 						"center": {
 							"x": 2472916.8,
 							"y": -99133747,
@@ -489,7 +463,6 @@
 						"type": "moon",
 						"bodyId": 122,
 						"parentId": 120,
-						"planetarySystemId": 0,
 						"center": {
 							"x": 2995424.5,
 							"y": -99275010,

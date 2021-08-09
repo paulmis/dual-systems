@@ -6,24 +6,9 @@
 
     <link rel="stylesheet" href="css/styles.css">
     <script src="js/jquery.js"></script>
-    <script>
-        function filterPOI(type) {
-            var id = 'poi-' + type + '-btn';
-            var element = document.getElementById(id);
-            console.log(id);
-
-            if (element.classList.contains('toggled')) {
-                element.classList.remove('toggled');
-            }
-            else {
-                element.classList.add('toggled');
-            }
-        }
-    </script>
+    <script type="module" src="js/scene.js"></script>
 </head>
 <body>
-    <script type="module" src="js/scene.js"></script>
-
     <div id="main-wrapper">
         <div id="left-menu">
             <div id="poi-current">
@@ -36,20 +21,17 @@
             </div>
             <div id="poi-wrapper">
                 <div id="poi-filters">
-                    <input type="button" id="poi-planets-btn" class="poi-list-btn toggled" value="Planets" onclick="filterPOI('planets')"/>
-                    <input type="button" id="poi-moons-btn" class="poi-list-btn" value="Moons" onclick="filterPOI('moons')"/>
-                    <input type="button" id="poi-starbases-btn" class="poi-list-btn" value="Starbases" onclick="filterPOI('starbases')"/>
-                    <input type="button" id="poi-fleets-btn" class="poi-list-btn" value="Fleets" onclick="filterPOI('fleets')"/>
+                    <input type="button" id="poi-planets-btn" class="poi-list-btn toggled" value="Planets"/>
+                    <input type="button" id="poi-moons-btn" class="poi-list-btn" value="Moons"/>
+                    <input type="button" id="poi-starbases-btn" class="poi-list-btn" value="Starbases"/>
+                    <input type="button" id="poi-fleets-btn" class="poi-list-btn" value="Fleets"/>
                 </div>
                 <ul id="poi-list">
                 </ul>
             </div>
         </div>
-        
         <div id="scene-wrapper">
-
         </div>
     </div>
-    
 </body>
 </html>
