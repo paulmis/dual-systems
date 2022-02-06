@@ -93,7 +93,7 @@ class Body extends MapObject {
 }
 
 let raycaster = new THREE.Raycaster();
-let intersected = null, intersectedColor = null;
+let intersected = null, lockIntersected = false, intersectedColor = null;
 let transparentIds = [], textIds = [];
 const pointer = new THREE.Vector2();
 const pointerId = null;
@@ -106,7 +106,7 @@ var renderIds = new Map(); // Maps three.js object ids to objects
 const aspect = width / height;
 const camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
 const controls = new TrackballControls(camera, wrapper);
-controls.rotateSpeed = 1.0;
+controls.rotateSpeed = 2.0;
 controls.zoomSpeed = 1.2;
 controls.panSpeed = 0.8;
 controls.keys = [ 'KeyA', 'KeyS', 'KeyD' ];
@@ -171,6 +171,7 @@ function animate() {
 
 wrapper.addEventListener('resize', onWindowResize);
 wrapper.addEventListener('mousemove', onPointerMove);
+wrapper.addEventListener('mousedown', onMouseDown);
 
 function onWindowResize() {
     width = $(wrapper).width(), height = $(wrapper).height();
@@ -179,6 +180,12 @@ function onWindowResize() {
     controls.handleResize();
     renderer.setSize(width, height);
     render();
+}
+
+function onMouseDown() {
+    if (intersected) {
+        lockIntersected = !lockIntersected;
+    }
 }
 
 function filterPOI(type) {
