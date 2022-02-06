@@ -81,6 +81,33 @@ class MapObject {
             }        
         }
     }
+
+    /**
+     * Creates the list of the objects on the map interface starting from this object.
+     * @param parentDOM the parent <ul> element
+     */
+    makeInterfaceList(parentDOM) {
+        // By default the child element list is the parent's list
+        // This changes if the object isn't filtered out 
+        var childDOM = parentDOM;
+
+        // Check if the object is filtered out
+        var btn = document.getElementById("poi-" + this.type + "s-btn");
+        if (!btn || btn.classList.contains("toggled")) {
+            // Add to the objects list
+            var listElement = document.createElement("li");
+            listElement.innerHTML = this.name;
+            parentDOM.appendChild(listElement);
+
+            // If the object has children, add a child DOM
+            if (this.hasChildren())
+                parentDOM.append(childDOM = document.createElement("ul"))
+        } 
+
+        // Make children
+        for (var child of this.children)
+            child.makeInterfaceList(childDOM);
+    }
 }
 
 // Represents any interplanetary astronomical object
@@ -92,6 +119,7 @@ class Body extends MapObject {
     }
 }
 
+// Scene setup
 let raycaster = new THREE.Raycaster();
 let intersected = null, lockIntersected = false, intersectedColor = null;
 let transparentIds = [], textIds = [];
@@ -138,14 +166,11 @@ function init() {
         $.each(json, function(id, starJson) {
             system.push(readBody(starJson));
         });
-    }).done(
-        function() {
-            // Make the objects list
-            for (var star of system) {
-                makeMapObjectList(star, document.getElementById("poi-list"));
-            }
-        }
-    );
+    }).done(() => {
+        // Make the objects list
+        for (var star of system)
+            star.makeInterfaceList(document.getElementById("poi-list"));
+    });
 
     // Add the ring
     const geometry = new THREE.RingGeometry(0, 140, 100);
@@ -158,9 +183,8 @@ function init() {
     camera.position.set(0, 0, 170);
 
     // Add onclick events to objects list buttons
-    for (const type of ['planets', 'moons', 'starbases', 'fleets']) {
+    for (const type of ['planets', 'moons', 'starbases', 'fleets'])
         document.getElementById('poi-' + type + '-btn').onclick = function() { filterPOI(type); };
-    }
 }
 
 function animate() {
@@ -173,21 +197,14 @@ wrapper.addEventListener('resize', onWindowResize);
 wrapper.addEventListener('mousemove', onPointerMove);
 wrapper.addEventListener('mousedown', onMouseDown);
 
-function onWindowResize() {
-    width = $(wrapper).width(), height = $(wrapper).height();
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    controls.handleResize();
-    renderer.setSize(width, height);
-    render();
-}
-
 function onMouseDown() {
-    if (intersected) {
-        lockIntersected = !lockIntersected;
-    }
+    if (intersected) lockIntersected = !lockIntersected;
 }
 
+/**
+ * Filters points of interers by type.
+ * @param type the POI type, e.g. moons
+ */
 function filterPOI(type) {
     // Toggle the button
     var btn = document.getElementById('poi-' + type + '-btn');
@@ -195,14 +212,22 @@ function filterPOI(type) {
 
     // Clear old elements
     const listElement = document.getElementById("poi-list");
-    while (listElement.firstChild) {
+    while (listElement.firstChild)
         listElement.removeChild(listElement.firstChild);
-    }
 
     // Add new elements
-    for (var star of system) {
-        makeMapObjectList(star, document.getElementById("poi-list"));
-    }
+    for (var star of system)
+        star.makeInterfaceList(document.getElementById("poi-list"));
+}
+
+// Whenever the window resizes render the scene anew
+function onWindowResize() {
+    width = $(wrapper).width(), height = $(wrapper).height();
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    controls.handleResize();
+    renderer.setSize(width, height);
+    render();
 }
 
 function onPointerMove(event) {
@@ -216,6 +241,9 @@ function onPointerMove(event) {
     render();
 }
 
+/**
+ * Renders the map.
+ */
 function render() {
     // Shoot the raycast
     raycaster.setFromCamera(pointer, camera);
@@ -285,32 +313,6 @@ function readBody(objectJson) {
     });
 
     return object;
-}
-
-function makeMapObjectList(object, parentDOM) {
-    // By default the child element list is the parent's list
-    // This changes if the object isn't filtered out 
-    var childDOM = parentDOM;
-
-    // Check if the object is filtered out
-    var btn = document.getElementById("poi-" + object.type + "s-btn");
-    if (!btn || btn.classList.contains("toggled")) {
-        // Add to the objects list
-        var listElement = document.createElement("li");
-        listElement.innerHTML = object.name;
-        parentDOM.appendChild(listElement);
-
-        // If the object has children, add a child DOM
-        if (object.hasChildren()) {
-            var childDOM = document.createElement("ul");
-            parentDOM.append(childDOM);
-        }
-    } 
-
-    // Make children
-    for (var childObject of object.children) {
-        makeMapObjectList(childObject, childDOM);
-    }
 }
 
 function getBodyMesh(type) {
