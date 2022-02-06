@@ -1,5 +1,4 @@
-import * as THREE from 'https://cdn.skypack.dev/three@0.131.3'
-import { TrackballControls } from 'https://cdn.skypack.dev/three@0.131.3/examples/jsm/controls/TrackballControls.js'
+
 
 const wrapper = document.getElementById("scene-wrapper");
 const width = $(wrapper).width(), height = $(wrapper).height();
@@ -9,106 +8,7 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(width, height);
 wrapper.appendChild(renderer.domElement);
 
-// Represents any map object
-class MapObject {
-    constructor(id, name, type, pos) { 
-        this.id = id;
-        this.name = name;
-        this.type = type;
-        this.pos = pos;
-        this.children = new Set();
-    }
 
-    hasChildren() {
-        return this.children.size > 0;
-    }
-
-    render(scene) {
-        // Generate the sphere
-        const sphere = getBodyMesh(this.type);
-        sphere.position.set(this.pos.x, this.pos.y, this.pos.z);
-        scene.add(sphere);
-        this.renderId = sphere.id;
-
-        // If the sphere is a planet, render its name
-        if (this.type == "planet") {
-            // Generate the text
-            const geometry = new THREE.TextGeometry(
-                this.name, 
-                {
-                    font: opensans,
-                    size: 2.0,
-                    height: 0.5,
-                    curveSegments: 50
-                }
-            );
-            const text = new THREE.Mesh(
-                geometry,
-                new THREE.MeshBasicMaterial({
-                    color: 0x66dd66
-                })
-            );
-
-            // Computer text dimensions
-            geometry.computeBoundingBox();
-            var vec = new THREE.Vector3();
-            geometry.boundingBox.getSize(vec);
-
-            // Add the text to the scene
-            text.position.set(this.pos.x - vec.x / 2, this.pos.y - 5, this.pos.z);
-            scene.add(text);
-            textIds.push(text.id);
-
-            // If the planet isn't close to the z=0 plane, generate the stand
-            if (Math.abs(this.pos.z) > 1) {
-                const line = new THREE.Line(
-                    new THREE.BufferGeometry().setFromPoints([
-                        this.pos,
-                        new THREE.Vector3(this.pos.x, this.pos.y, 0)]),
-                    new THREE.MeshBasicMaterial({
-                        color: 0xeeeeee,
-                    })
-                );
-                const ring = new THREE.Mesh(
-                    new THREE.RingGeometry(0, 3, 20),
-                    new THREE.MeshBasicMaterial({
-                        opacity: 0.4, 
-                        transparent: true
-                    })
-                );
-                ring.position.set(this.pos.x, this.pos.y, 0);
-                scene.add(line, ring);
-            }        
-        }
-    }
-
-    /**
-     * Creates the list of the objects on the map interface starting from this object.
-     * @param parentDOM the parent <ul> element
-     */
-    makeInterfaceList(parentDOM) {
-        // By default the child element list is the parent's list
-        // This changes if the object isn't filtered out 
-        var childDOM = parentDOM;
-
-        // Check if the object is filtered out
-        var btn = document.getElementById("poi-" + this.type + "s-btn");
-        if (!btn || btn.classList.contains("toggled")) {
-            // Add to the objects list
-            var listElement = document.createElement("li");
-            listElement.innerHTML = this.name;
-            parentDOM.appendChild(listElement);
-
-            // If the object has children, add a child DOM
-            if (this.hasChildren())
-                parentDOM.append(childDOM = document.createElement("ul"))
-        } 
-
-        // Make children
-        for (var child of this.children)
-            child.makeInterfaceList(childDOM);
-    }
-}
 
 // Represents any interplanetary astronomical object
 class Body extends MapObject {
@@ -155,43 +55,6 @@ loader.load(
 while (opensans == null) {
     await new Promise(r => setTimeout(r, 2));
 }  
-
-init();
-animate();
-
-function init() {
-    // Read bodies from the file
-    $.getJSON("data/helios.json", function(json) {
-        // Append stars of the system
-        $.each(json, function(id, starJson) {
-            system.push(readBody(starJson));
-        });
-    }).done(() => {
-        // Make the objects list
-        for (var star of system)
-            star.makeInterfaceList(document.getElementById("poi-list"));
-    });
-
-    // Add the ring
-    const geometry = new THREE.RingGeometry(0, 140, 100);
-    const material = new THREE.MeshBasicMaterial({color: 0xddddff, opacity: 0.15, transparent: true})
-    const ring = new THREE.Mesh(geometry, material);
-    scene.add(ring);
-    transparentIds.push(ring.id);
-    ring.position.set(-2, 30, 0);
-
-    camera.position.set(0, 0, 170);
-
-    // Add onclick events to objects list buttons
-    for (const type of ['planets', 'moons', 'starbases', 'fleets'])
-        document.getElementById('poi-' + type + '-btn').onclick = function() { filterPOI(type); };
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-    render();
-}
 
 wrapper.addEventListener('resize', onWindowResize);
 wrapper.addEventListener('mousemove', onPointerMove);
@@ -313,29 +176,6 @@ function readBody(objectJson) {
     });
 
     return object;
-}
-
-function getBodyMesh(type) {
-    switch (type) {
-        case "star": 
-            return new THREE.Mesh(
-                new THREE.SphereGeometry(3.0),
-                new THREE.MeshBasicMaterial({
-                    color: 0xf4cd00,
-                }));
-        case "planet": 
-            return new THREE.Mesh(
-                new THREE.SphereGeometry(1.0),
-                new THREE.MeshBasicMaterial({
-                    color: 0xeeeeee,
-                }));
-        case "moon":
-            return new THREE.Mesh(
-                new THREE.SphereGeometry(0.4),
-                new THREE.MeshBasicMaterial({
-                    color: 0xbbbbbb,
-                }));
-    }
 }
 
 function setBodyInfo(body) {
