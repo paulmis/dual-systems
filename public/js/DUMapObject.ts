@@ -2,12 +2,14 @@ import { BufferGeometry, Line, Mesh, MeshBasicMaterial, Object3D, RingGeometry, 
 import { pos3d } from "./positions";
 
 // Represents any map object
-export default class MapObject {
+export default class DUMapObject {
     id: string;
+    sceneId: number;
     name: string;
     type: string;
     pos: Vector3;
-    children: Set<MapObject>;
+    children: Set<DUMapObject>;
+    transparent: boolean = false;
     radius?: number;
     gravity?: number;
 
@@ -16,7 +18,7 @@ export default class MapObject {
     line: Line;
 
     constructor(id: string, name: string, type: string, pos: Vector3, 
-        children: Set<MapObject>, radius?: number, gravity?: number) { 
+        children: Set<DUMapObject>, radius?: number, gravity?: number) { 
         this.id = id;
         this.name = name;
         this.type = type;
@@ -26,18 +28,18 @@ export default class MapObject {
         this.gravity = gravity;
     }
 
-    static parse(json: any): MapObject {
+    static parse(json: any): DUMapObject {
         // Normalize coordinates
         var pos = new Vector3(json.center.x, json.center.y, json.center.z)
             .divideScalar(1000000);
 
         // Get children
-        var children: Set<MapObject> = new Set();
+        var children: Set<DUMapObject> = new Set();
         for (var childJson of json.children)
-            children.add(MapObject.parse(childJson));
+            children.add(DUMapObject.parse(childJson));
     
         // Create the body
-        return new MapObject(
+        return new DUMapObject(
             json.bodyId,
             json.name,
             json.type,
@@ -90,7 +92,7 @@ export default class MapObject {
         scene.add(this.body, this.line, this.ring);
 
         // Render children
-        this.children.forEach(function(o: MapObject) {
+        this.children.forEach(function(o: DUMapObject) {
             o.render(scene);
         });
     }
