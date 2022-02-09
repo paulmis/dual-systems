@@ -28,22 +28,24 @@ export default class DUMapObject {
         this.gravity = gravity;
     }
 
+    /**
+     * Parses the JSON fragment containing map data.
+     * @param json the json string
+     * @returns the top-level map object
+     */
     static parse(json: any): DUMapObject {
-        // Normalize coordinates
-        var pos = new Vector3(json.center.x, json.center.y, json.center.z)
-            .divideScalar(1000000);
-
         // Get children
         var children: Set<DUMapObject> = new Set();
-        for (var childJson of json.children)
-            children.add(DUMapObject.parse(childJson));
+        json.children.array.forEach((child: any) => {
+            children.add(DUMapObject.parse(child));
+        });
     
         // Create the body
         return new DUMapObject(
             json.bodyId,
             json.name,
             json.type,
-            pos,
+            new Vector3(json.center.x, json.center.y, json.center.z).divideScalar(1000000),
             children,
             json.radius,
             json.gravity);
@@ -54,6 +56,17 @@ export default class DUMapObject {
      */
     public hasChildren() {
         return this.children.size > 0;
+    }
+
+    /**
+     * Returns all children of this object.
+     */
+    public get allChildren(): Set<DUMapObject> {
+        return [...this.children]
+            .reduce((s: Set<DUMapObject>, child: DUMapObject) => {
+                child.allChildren.forEach(s.add, s);
+                return s;
+            }, new Set([this]));
     }
 
     /**

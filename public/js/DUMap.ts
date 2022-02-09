@@ -72,12 +72,9 @@ export default class DUMap {
         $.getJSON(src, (json: any) => {
             // Append stars of the system
             $.each(json, function(id: string, json: any) {
-                this.add(DUMapObject.parse(json));
-            });
-        }).done(() => {
-            // Make the objects list
-            this.objects.forEach(function(o: DUMapObject) {
-                o.makeInterfaceList(this.listDOM); 
+                var obj: DUMapObject = DUMapObject.parse(json);
+                obj.allChildren.forEach(this.add);
+                obj.makeInterfaceList(this.listDOM);
             });
         });
 
