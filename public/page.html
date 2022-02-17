@@ -6,34 +6,32 @@
 
     <link rel="stylesheet" href="css/styles.css">
     <script src="js/jquery.js"></script>
+    <script type="module" src="js/scene.js"></script>
 </head>
 <body>
-    <script type="text/javascript" src="http://localhost:8080/three"></script>
-    <script>
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize( window.innerWidth, window.innerHeight );
-        document.body.appendChild( renderer.domElement );
-
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-        const cube = new THREE.Mesh( geometry, material );
-        scene.add( cube );
-
-        camera.position.z = 5;
-
-        const animate = function () {
-            requestAnimationFrame( animate );
-
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
-
-            renderer.render( scene, camera );
-        };
-
-        animate();
-    </script>
+    <div id="main-wrapper">
+        <div id="left-menu">
+            <div id="poi-current">
+                <img id="poi-current-image">
+                <div id="poi-current-data">
+                    <p id="poi-current-name"></p>
+                    <p id="poi-current-gravity"></p>
+                    <p id="poi-current-size"></p>
+                </div>
+            </div>
+            <div id="poi-wrapper">
+                <div id="poi-filters">
+                    <input type="button" id="poi-planets-btn" class="poi-list-btn toggled" value="Planets"/>
+                    <input type="button" id="poi-moons-btn" class="poi-list-btn" value="Moons"/>
+                    <input type="button" id="poi-starbases-btn" class="poi-list-btn" value="Starbases"/>
+                    <input type="button" id="poi-fleets-btn" class="poi-list-btn" value="Fleets"/>
+                </div>
+                <ul id="poi-list">
+                </ul>
+            </div>
+        </div>
+        <div id="scene-wrapper">
+        </div>
+    </div>
 </body>
 </html>
